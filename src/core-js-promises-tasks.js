@@ -71,9 +71,46 @@ getPromiseResult(Promise.reject()).then((result) => result);
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)]  => Promise fulfilled with 1
  * [Promise.reject(1), Promise.reject(2), Promise.reject(3)]    => Promise rejected
  */
-function getFirstResolvedPromiseResult(/* promises */) {
-  throw new Error('Not implemented');
+function getFirstResolvedPromiseResult(promises) {
+  if (!promises || promises.length === 0) {
+    return Promise.reject(new Error('Array is empty'));
+  }
+  return Promise.any(promises).catch(() => {
+    throw new Error('All promises were rejected');
+  });
 }
+
+getFirstResolvedPromiseResult([
+  Promise.resolve(1),
+  Promise.resolve(2),
+  Promise.resolve(3),
+])
+  .then((result) => result)
+  .catch((error) => error);
+
+getFirstResolvedPromiseResult([
+  Promise.reject(new Error('Error 1')),
+  Promise.resolve(2),
+  Promise.resolve(3),
+])
+  .then((result) => result)
+  .catch((error) => error);
+
+getFirstResolvedPromiseResult([
+  Promise.resolve(1),
+  Promise.reject(new Error('Error 2')),
+  Promise.resolve(3),
+])
+  .then((result) => result)
+  .catch((error) => error);
+
+getFirstResolvedPromiseResult([
+  Promise.reject(new Error('Error 1')),
+  Promise.reject(new Error('Error 2')),
+  Promise.reject(new Error('Error 3')),
+])
+  .then((result) => result)
+  .catch((error) => error);
 
 /**
  * Returns containing the value of the first promise of a resolved or a rejected.
