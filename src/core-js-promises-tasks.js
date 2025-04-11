@@ -131,9 +131,42 @@ getFirstResolvedPromiseResult([
  * [promise3, promise6, promise2] => Promise rejected with 2
  * [promise3, promise4, promise6] => Promise rejected with 6
  */
-function getFirstPromiseResult(/* promises */) {
-  throw new Error('Not implemented');
+function getFirstPromiseResult(promises) {
+  if (!Array.isArray(promises)) {
+    return Promise.reject(new Error('Expected an array of promises'));
+  }
+  if (!promises || promises.length === 0) {
+    return Promise.reject(new Error('No promises here'));
+  }
+  return Promise.race(promises);
 }
+const promise1 = Promise.resolve(1);
+const promise2 = Promise.reject(new Error('2'));
+const promise3 = new Promise((resolve) => {
+  setTimeout(() => resolve(3), 50);
+});
+const promise4 = new Promise((resolve) => {
+  setTimeout(() => resolve(4), 100);
+});
+const promise5 = new Promise((resolve) => {
+  setTimeout(() => resolve(5), 150);
+});
+const promise6 = new Promise((reject) => {
+  setTimeout(() => reject(6), 10);
+});
+
+getFirstPromiseResult([promise3, promise6, promise1])
+  .then((result) => result)
+  .catch((error) => error);
+getFirstPromiseResult([promise4, promise3, promise5])
+  .then((result) => result)
+  .catch((error) => error);
+getFirstPromiseResult([promise3, promise6, promise2])
+  .then((result) => result)
+  .catch((error) => error);
+getFirstPromiseResult([promise3, promise4, promise6])
+  .then((result) => result)
+  .catch((error) => error);
 
 /**
  * Attempts to resolve all provided promises. If all promises resolve successfully, it returns a promise that resolves with an array of their values.
