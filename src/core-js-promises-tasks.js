@@ -241,9 +241,33 @@ getAllResult([
  * [promise1, promise4, promise3] => Promise.resolved('104030')
  * [promise1, promise4, promise3, promise2] => Promise.resolved('10403020')
  */
-function queuePromises(/* promises */) {
-  throw new Error('Not implemented');
+function queuePromises(promises) {
+  const result = [];
+  let chain = Promise.resolve();
+  promises.forEach((promise) => {
+    chain = chain.then(() =>
+      promise.then((value) => {
+        result.push(value);
+      })
+    );
+  });
+  return chain.then(() => result.join(''));
 }
+const promise0 = Promise.resolve(10);
+const promise12 = Promise.resolve(20);
+const promise13 = Promise.resolve(30);
+const promise14 = new Promise((resolve) => {
+  setTimeout(() => resolve(40), 10);
+});
+queuePromises([promise0, promise3, promise12])
+  .then((result) => result)
+  .catch((error) => error);
+queuePromises([promise0, promise14, promise13])
+  .then((result) => result)
+  .catch((error) => error);
+queuePromises([promise0, promise14, promise13, promise12])
+  .then((result) => result)
+  .catch((error) => error);
 
 module.exports = {
   getPromise,
